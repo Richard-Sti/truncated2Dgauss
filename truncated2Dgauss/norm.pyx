@@ -1,9 +1,20 @@
-from scipy.special import erf as erf_scipy
 from scipy.special import erfinv as erfinv_scipy
 from scipy.integrate import quad
 
+import numpy
+cimport numpy
+from libc.math cimport erf
 
-def erf(float z):
+numpy.import_array()
+DTYPE = numpy.float64
+ctypedef numpy.float64_t DTYPE_t
+
+
+def _erfunc(double z):
+    return erf(z)
+
+
+def erfunc(double z):
     r"""
     Calculate the error function specified as
     
@@ -21,14 +32,13 @@ def erf(float z):
     result : float
         Evaluated error function.
     """
-    cdef float sign
-    sign = 1.0 if z > 0 else -1.0
+    cdef double sign = 1.0 if z > 0 else -1.0
     if z < 0:
         z *= -1
-    return 0.5 * (1 + sign * erf_scipy(z / 2**0.5))
+    return 0.5 * (1 + sign * _erfunc(z / 2**0.5))
 
 
-def erfinv(float x):
+def erfinv(double x):
     r"""
     Inverse error function as specified in ``erf``.
 
@@ -42,15 +52,12 @@ def erfinv(float x):
     result : float
         Error function inverse.
     """
-    cdef float sign
-    sign = 1.0 if (x - 0.5) > 0 else -1.0
+    cdef double sign = 1.0 if (x - 0.5) > 0 else -1.0
     return sign * 2**0.5 * erfinv_scipy(sign * (2 * x - 1))
 
 
-def cholesky2x2(float var1, float var2, float corr):
+def cholesky2x2(numpy.ndarray[DTYPE_t, ndim=2] S):
     r"""
-    TODO: rewrite the documentation
-
     Calculate the Cholesky decomposition of a symmetric and positive
     semi-definite 2x2 covariance matrix `S`. The Cholesky decomposition is
     returned in the form:
@@ -71,48 +78,74 @@ def cholesky2x2(float var1, float var2, float corr):
     a, b, c : floats
         Cholesky decomposition as specified above.
     """
-    cdef float a, b, c
     # Cholesky decomposition solved analytically for a 2x2 matrix 
-    a = var1**0.5
-    b = (var2 - corr**2 / var1)**0.5
-    c = corr / a
+    cdef float a = S[0, 0]**0.5
+    cdef float b = (S[1, 1] - S[0, 1]**2 / S[0, 0])**0.5
+    cdef float c = S[0, 1] / a
 
     return a, b, c
 
 
+def in_bounds(
+    numpy.ndarray[DTYPE_t, ndim=1] x,
+    numpy.ndarray[DTYPE_t, ndim=1] lower,
+    numpy.ndarray[DTYPE_t, ndim=1] upper
+):
+    return ((x[0] >= lower[0]) & (x[1] >= lower[1])
+            & (x[0] <= upper[0]) & (x[1] <= upper[1]))
+
+
 cdef class BoxProbability:
-    cdef float a1, b1
-    cdef float a2, b2
-    cdef float c11, c22, c12
-    cdef float erf_a1, erf_b1
-    cdef float a2_norm, b2_norm
+    cdef numpy.ndarray _lower
+    cdef numpy.ndarray _upper
+    cdef double c11, c22, c12
+    cdef double erf_xmin, erf_xmax
+    cdef double ymin_norm, ymax_norm
     cdef dict _quad_kwargs
 
-    def __init__(self, float a1, float b1, float a2, float b2, dict quad_kwargs={}):
-        self.a1, self.b1 = a1, b1
-        self.a2, self.b2 = a2, b2
+    def __init__(
+        self,
+        numpy.ndarray[DTYPE_t, ndim=1] lower,
+        numpy.ndarray[DTYPE_t, ndim=1] upper,
+        dict quad_kwargs={}
+    ):
+        self._lower = lower
+        self._upper = upper
         self._quad_kwargs = quad_kwargs
+
+    @property
+    def lower(self):
+        return self._lower
+
+    @property
+    def upper(self):
+        return self._upper
     
-    def _integrand(self, float w):
-        cdef float inv_norm
+    def _integrand(self, double w):
 
-        inv_norm = erfinv(self.erf_a1 + w * (self.erf_b1 - self.erf_a1))
+        inv_norm = erfinv(self.erf_xmin
+                          + w * (self.erf_xmax - self.erf_xmin))
         inv_norm *= self.c12 / self.c22
-        return erf(self.b2_norm - inv_norm) - erf(self.a2_norm - inv_norm)
+        return erfunc(self.ymax_norm - inv_norm) - erfunc(self.ymin_norm - inv_norm)
 
-    def __call__(self, float var1, float var2, float corr):
-        cdef float intg, err
+    def __call__(
+        self,
+        numpy.ndarray[DTYPE_t, ndim=1] mu,
+        numpy.ndarray[DTYPE_t, ndim=2] cov
+    ):
 
-        self.c11, self.c22, self.c12 = cholesky2x2(var1, var2, corr)
-        self.erf_a1 = erf(self.a1 / self.c11)
-        self.erf_b1 = erf(self.b1 / self.c11)
+        cdef double intg, err
 
-        self.a2_norm = self.a2 / self.c22
-        self.b2_norm = self.b2 / self.c22
+        self.c11, self.c22, self.c12 = cholesky2x2(cov)
+        self.erf_xmin = erfunc((self.lower[0] - mu[0]) / self.c11)
+        self.erf_xmax = erfunc((self.upper[0] - mu[0]) / self.c11)
+
+        self.ymin_norm = (self.lower[1] - mu[1])/ self.c22
+        self.ymax_norm = (self.upper[1] - mu[1])/ self.c22
 
         intg, err = quad(self._integrand, 0.0, 1.0, **self._quad_kwargs)
 
-        if err > 1e-5:
-            raise ValueError("Integration error of {} > 1e-5.".format(err))
+        if err > 1e-6:
+            raise ValueError("Integration error of {} > 1e-6.".format(err))
 
-        return (self.erf_b1 - self.erf_a1) * intg
+        return (self.erf_xmax - self.erf_xmin) * intg

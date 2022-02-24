@@ -112,4 +112,7 @@ cdef class BoxProbability:
 
         intg, err = quad(self._integrand, 0.0, 1.0, **self._quad_kwargs)
 
-        return (self.erf_b1 - self.erf_a1) * intg, err
+        if err > 1e-5:
+            raise ValueError("Integration error of {} > 1e-5.".format(err))
+
+        return (self.erf_b1 - self.erf_a1) * intg

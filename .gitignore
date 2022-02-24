@@ -2,3 +2,5 @@
 build/*
 *.c
 *.html
+*.ipynb
+*/__pycache__/*

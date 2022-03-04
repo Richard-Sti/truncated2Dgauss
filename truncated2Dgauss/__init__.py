@@ -1,2 +1,2 @@
-from .box_cdf import BoxCDF, in_bounds
-#from .truncated2Dgauss import Truncated2DGaussian
+from .prob_mass import CDFIntegral, is_in_bounds, is_higher_equal
+from .dist import Truncated2DGaussian

@@ -44,6 +44,12 @@ class Truncated2DGauss:
     A truncated 2-dimensional Gaussian distribution with probability density
     function and random sampling methods.
 
+    Calculated following:
+    
+        Genz, Alan. “Numerical Computation of Multivariate Normal
+        Probabilities.” Journal of Computational and Graphical Statistics 1,
+        no. 2 (1992): 141–49. https://doi.org/10.2307/1390838.
+
     Arguments
     ---------
     lower : 1-dimensional array

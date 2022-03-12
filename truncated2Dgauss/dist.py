@@ -21,22 +21,35 @@ from scipy.stats import multivariate_normal
 from .prob_mass import CDFIntegral, is_higher_equal, is_in_bounds
 
 
-class Truncated2DGaussian:
+def list_to_array(x):
+    if isinstance(x, numpy.ndarray):
+        return x
+    else:
+        return numpy.asarray(x)
+
+class Truncated2DGauss:
     _lower = None
     _upper = None
     _cdf = None
     _cov_hash = numpy.nan
     _dist = None
-    _allow_singular = False
+    _random_generator = None
 
-    def __init__(self, lower, upper, allow_singular=False):
-        if not is_higher_equal(upper, lower):
+    def __init__(self, lower, upper, random_generator=None):
+        # Ensure we have numpy arrays
+        self._lower = list_to_array(lower)
+        self._upper = list_to_array(upper)
+        # Which have correct ordering 
+        if not is_higher_equal(self._upper, self._lower):
             raise ValueError("`upper={}` must be larger than `lower={}`."
-                             .format(lower, upper))
-        self._lower = lower
-        self._upper = upper
-        self._allw_singular = allow_singular
-        self._cdf = CDFIntegral(lower, upper)
+                             .format(self._lower, self._upper))
+        # Create the random generator
+        if random_generator is None:
+            self._random_generator = numpy.random.default_rng()
+        else:
+            self._random_generator = random_generator
+
+        self._cdf = CDFIntegral(self._lower, self._upper)
 
     @property
     def lower(self):
@@ -45,7 +58,7 @@ class Truncated2DGaussian:
 
         Returns
         -------
-        lower : array
+        lower : 1-dimensional array
         """
         return self._lower
 
@@ -56,11 +69,11 @@ class Truncated2DGaussian:
 
         Returns
         -------
-        upper : array
+        upper : 1-dimensional array
         """
         return self._upper
 
-    def _check_new_cov(self, cov):
+    def _check_new_cov(self, cov, allow_singular):
         """
         Check whether the covariance matrix has changed. If yes recalculate
         the internal multivariate normal distribution.
@@ -69,12 +82,18 @@ class Truncated2DGaussian:
         ---------
         cov : 2-dimensional array
             The new covariance matrix.
+        allow_singular : bool, optional
+            Whether to allow a singular covariance matrix.
         """
         new_hash = hash(cov.data.tobytes())
         if new_hash != self._cov_hash:
             self._cov_hash = new_hash
             self._dist = multivariate_normal(
-                cov=cov, allow_singular=self._allow_singular)
+                cov=cov, allow_singular=allow_singular)
+
+    def _is_mean_in_bounds(self, mean):
+        if not is_in_bounds(mean, self.lower, self.upper):
+            return ValueError("`mean={}` is out of bounds.".format(mean))
 
     def logpdf(self, x, mean, cov, allow_singular=False):
         """
@@ -82,14 +101,18 @@ class Truncated2DGaussian:
         
         TODO: finish up the docs
         """
-        # Check the mean is in bounds
-        if not is_in_bounds(x, self.lower, self.upper):
-            return ValueError("`mean={}` is out of bounds.".format(mean))
+        # Optionally convert to arrays
+        x = list_to_array(x)
+        mean = list_to_array(x)
+        cov = list_to_array(cov)
+        
+        self._is_mean_in_bounds(mean)
         # Check current position is in bounds
         if not is_in_bounds(x, self.lower, self.upper):
             return -numpy.infty
+
         # Optionally update the distribution
-        self._check_new_cov(cov)
+        self._check_new_cov(cov, allow_singular)
         return self._dist.logpdf(x - mean) - numpy.log(self._cdf(mean, cov))
 
     def pdf(self, x, mean, cov, allow_singular=False):
@@ -97,7 +120,7 @@ class Truncated2DGaussian:
 
     def rvs(self, mean, cov):
         """
-        Rejection sampling of a single observation from the trucanted 2D
+        Rejection sampling of a single observation from the truncated 2D
         distribution.
         
         Arguments
@@ -113,10 +136,9 @@ class Truncated2DGaussian:
             The new observation.
         """
         # Check the mean is in bounds
-        if not is_in_bounds(x, self.lower, self.upper):
-            return ValueError("`mean={}` is out of bounds.".format(mean))
-        self._check_new_cov(cov)
+        mean = list_to_array(mean)
+        self._is_mean_in_bounds(mean)
         while True:
-            x = mean + self._dist.rvs()
+            x = self._random_generator.multivariate_normal(mean, cov)
             if is_in_bounds(x, self.lower, self.upper):
                 return x

@@ -22,8 +22,26 @@ from numpy import get_include
 
 
 setup(
-    ext_modules = cythonize(["truncated2Dgauss/erf.pyx",
-                             "truncated2Dgauss/prob_mass.pyx"],
+    name='trauncated2Dgauss',
+    version='1.0',
+    description='A truncated 2D Gaussian distribution.',
+    url='https://github.com/Richard-Sti/truncated2Dgauss',
+    author='Richard Stiskalek',
+    author_email='richard.stiskalek@protonmail.com',
+    license='GPL-3.0',
+    packages=['truncated2Dgauss'],
+    install_requires=['scipy',
+                      'numpy',
+                      'Cython'],
+    classifiers=[
+        'Development Status :: 1 - Planning',
+        'Intended Audience :: Science/Research',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'],
+    ext_modules = cythonize("truncated2Dgauss/prob_mass.pyx",
                             annotate=True),
     include_dirs=[get_include()]
 )

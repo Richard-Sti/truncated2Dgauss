@@ -1,13 +1,11 @@
 # Truncated 2D Gaussian distribution
 
-A tool to calculate the probability density function of a 2-dimensional truncated Gaussian distribution along with rejection sampling. Relies on Cython to integrate the unconstrained Gaussian distribution over the specified 2-dimensional box.
+Truncated 2D Gaussian (covariate) distribution class with a method to efficiently calculate the probability density function and a rejection sampler. The 2D Gaussian distribution is assumed to be truncated over a rectangular box.
+
+Performs some calculations in Cython. The PDF calculation follows "Genz, Alan. “Numerical Computation of Multivariate Normal Probabilities.” Journal of Computational and Graphical Statistics 1, no. 2 (1992): 141–49. https://doi.org/10.2307/1390838".
+
 
 ## TODO
-
-- [ ] Reference the paper where the calculation is done.
-- [x] Clean up the documentation
-- [ ] Write a proper Readme
-- [x] Clean up the imports
-
-## Notes
-- In the rejection sampling assumed infinite loop, maybe add some maximum iteration?
+- [ ] Prepare a proper setup file.
+- [ ] Add example code in readme
+- [ ] Make sure it can be pip installable.

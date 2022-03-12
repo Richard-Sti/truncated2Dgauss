@@ -13,7 +13,4 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-
-from .prob_mass import CDFIntegral, is_in_bounds, is_higher_equal
 from .dist import Truncated2DGauss

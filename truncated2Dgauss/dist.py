@@ -27,7 +27,7 @@ def list_to_array(x):
     ---------
     x : list or array
         Input list of array
-    
+
     Returns
     -------
     x : numpy.ndarray
@@ -68,7 +68,7 @@ class Truncated2DGauss:
         # Ensure we have numpy arrays
         self._lower = list_to_array(lower)
         self._upper = list_to_array(upper)
-        # Which have correct ordering 
+        # Which have correct ordering
         if not is_higher_equal(self._upper, self._lower):
             raise ValueError("`upper={}` must be larger than `lower={}`."
                              .format(self._lower, self._upper))
@@ -115,7 +115,7 @@ class Truncated2DGauss:
             Whether to allow a singular covariance matrix.
         """
         # First ensure that the covariance is symmetric
-        if abs(cov[0,1] - cov [1,0]) >= self._atol:
+        if abs(cov[0, 1] - cov[1, 0]) > self._atol:
             raise ValueError("Covariance {} is not symmetric.".format(cov))
         new_hash = hash(cov.data.tobytes())
         if new_hash != self._cov_hash:
@@ -151,7 +151,7 @@ class Truncated2DGauss:
         x = list_to_array(x)
         mean = list_to_array(mean)
         cov = list_to_array(cov)
-        
+
         self._is_mean_in_bounds(mean)
         # Check current position is in bounds
         if not is_in_bounds(x, self.lower, self.upper):

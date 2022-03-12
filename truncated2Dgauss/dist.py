@@ -74,6 +74,8 @@ class Truncated2DGauss:
         # Ensure we have numpy arrays
         self._lower = list_to_array(lower)
         self._upper = list_to_array(upper)
+        if self._lower.size != 2 or self._upper.size != 2:
+            raise ValueError("Box upper and lower must each have size 2.")
         # Which have correct ordering
         if not is_higher_equal(self._upper, self._lower):
             raise ValueError("`upper={}` must be larger than `lower={}`."
@@ -120,6 +122,10 @@ class Truncated2DGauss:
         allow_singular : bool, optional
             Whether to allow a singular covariance matrix.
         """
+        # Check we have the correct shape
+        if cov.shape != (2,2):
+            raise ValueError("Covariance must have shape (2,2), currently {}"
+                             .format(cov.shape))
         # First ensure that the covariance is symmetric
         if abs(cov[0, 1] - cov[1, 0]) > self._atol:
             raise ValueError("Covariance {} is not symmetric.".format(cov))

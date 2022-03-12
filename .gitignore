@@ -4,3 +4,4 @@ build/*
 *.html
 *.ipynb
 */__pycache__/*
+*.vscode

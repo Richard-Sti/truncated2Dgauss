@@ -22,7 +22,7 @@ from numpy import get_include
 
 
 setup(
-    name='trauncated2Dgauss',
+    name='truncated2Dgauss',
     version='1.0',
     description='A truncated 2D Gaussian distribution.',
     url='https://github.com/Richard-Sti/truncated2Dgauss',
@@ -42,7 +42,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9'],
     ext_modules = cythonize("truncated2Dgauss/prob_mass.pyx",
-                            annotate=False),
+                            annotate=True),
     include_dirs=[get_include(),],
     zip_safe=False,
 )

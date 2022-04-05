@@ -90,6 +90,9 @@ def test_boundaries(lower, upper, cov):
                                  [[1, 0.9], [0.9, 1]]])
 @pytest.mark.parametrize("seed", [SEED, 2022])
 def test_rvs(lower, upper, cov, seed):
+    """
+    Test drawing samples.
+    """
     dist = Truncated2DGauss(lower, upper, seed)
 
     for i in range(NSAMPLES):

@@ -19,7 +19,7 @@ from scipy.stats import multivariate_normal
 from .prob_mass import CDFIntegral, is_higher_equal, is_in_bounds
 
 
-def list_to_array(x):
+def list_to_array(x, enforce_float=False):
     """
     Check if `x` is a numpy array, if not convert it to it.
 
@@ -27,16 +27,19 @@ def list_to_array(x):
     ---------
     x : list or array
         Input list of array
+    enfource_float : bool, optinal
+        Whether to enforce the output array dtype to be float.
 
     Returns
     -------
     x : numpy.ndarray
         Output array.
     """
-    if isinstance(x, numpy.ndarray):
-        return x
-    else:
-        return numpy.asarray(x)
+    if not isinstance(x, numpy.ndarray):
+        x = numpy.asarray(x)
+    if enforce_float:
+        x = x.astype(float)
+    return x
 
 
 class Truncated2DGauss:
@@ -72,8 +75,8 @@ class Truncated2DGauss:
 
     def __init__(self, lower, upper, random_generator=None, atol=1e-8):
         # Ensure we have numpy arrays
-        self._lower = list_to_array(lower).astype(float)
-        self._upper = list_to_array(upper).astype(float)
+        self._lower = list_to_array(lower, True)
+        self._upper = list_to_array(upper, True)
         if self._lower.size != 2 or self._upper.size != 2:
             raise ValueError("Box upper and lower must each have size 2.")
         # Which have correct ordering
@@ -160,9 +163,9 @@ class Truncated2DGauss:
             The log probability density at `x`.
         """
         # Optionally convert to arrays
-        x = list_to_array(x)
-        mean = list_to_array(mean)
-        cov = list_to_array(cov)
+        x = list_to_array(x, True)
+        mean = list_to_array(mean, True)
+        cov = list_to_array(cov, True)
 
         self._is_mean_in_bounds(mean)
         # Check current position is in bounds
@@ -213,7 +216,8 @@ class Truncated2DGauss:
             The new observation.
         """
         # Check the mean is in bounds
-        mean = list_to_array(mean)
+        mean = list_to_array(mean, True)
+        cov = list_to_array(cov, True)
         self._is_mean_in_bounds(mean)
         while True:
             x = self._random_generator.multivariate_normal(mean, cov)

@@ -28,8 +28,8 @@ setup(
     author_email='richard.stiskalek@protonmail.com',
     license='GPL-3.0',
     packages=['truncated2Dgauss'],
-    install_requires=['scipy',
-                      'numpy',
+    install_requires=['scipy>=0.16.0',
+                      'numpy>=1.17.0',
                       'Cython'],
     classifiers=[
         'Development Status :: 1 - Planning',

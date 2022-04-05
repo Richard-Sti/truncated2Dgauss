@@ -73,7 +73,7 @@ def test_boundaries(lower, upper, cov):
                       & (lower[1] < x[1] < upper[1]))
 
         assert numpy.isfinite(dist.logpdf(x, MU, cov)) == isinbounds
-    
+
 
 @pytest.mark.parametrize("lower", [[0, 0],
                                    [-1, 0],

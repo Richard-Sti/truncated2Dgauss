@@ -42,6 +42,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9'],
     ext_modules = cythonize("truncated2Dgauss/prob_mass.pyx",
-                            annotate=True),
-    include_dirs=[get_include()]
+                            annotate=False),
+    include_dirs=[get_include(),],
+    zip_safe=False,
 )

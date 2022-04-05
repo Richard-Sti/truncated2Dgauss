@@ -41,13 +41,11 @@ numpy.random.seed(SEED)
 @pytest.mark.parametrize("cov", [[[1, 0.5], [0.5, 1]],
                                  [[1, 0.9], [0.9, 1]]])
 def test_normalisation(lower, upper, cov):
-    """
-    Test that the PDF is correctly normalised and 0 outside boundaries.
-    """
+    """Test that the PDF is correctly normalised and 0 outside boundaries."""
     dist = Truncated2DGauss(lower, upper, SEED)
 
     f = lambda y, x: dist.pdf([x, y], MU, cov)
-    intg, err = dblquad(f, lower[0], upper[0], lower[1], upper[1])
+    intg = dblquad(f, lower[0], upper[0], lower[1], upper[1])[0]
     assert numpy.isclose(intg, 1.0)
 
 
@@ -61,9 +59,7 @@ def test_normalisation(lower, upper, cov):
                                  [[1, 0.5], [0.5, 1]],
                                  [[1, 0.9], [0.9, 1]]])
 def test_boundaries(lower, upper, cov):
-    """
-    Test that the PDF is 0 outside boundaries.
-    """
+    """Test that the PDF is 0 outside boundaries."""
     dist = Truncated2DGauss(lower, upper, SEED)
     lower = numpy.array(lower)
     upper = numpy.array(upper)
@@ -77,7 +73,7 @@ def test_boundaries(lower, upper, cov):
                       & (lower[1] < x[1] < upper[1]))
 
         assert numpy.isfinite(dist.logpdf(x, MU, cov)) == isinbounds
-        
+    
 
 @pytest.mark.parametrize("lower", [[0, 0],
                                    [-1, 0],
@@ -90,12 +86,10 @@ def test_boundaries(lower, upper, cov):
                                  [[1, 0.9], [0.9, 1]]])
 @pytest.mark.parametrize("seed", [SEED, 2022])
 def test_rvs(lower, upper, cov, seed):
-    """
-    Test drawing samples.
-    """
+    """Test drawing samples."""
     dist = Truncated2DGauss(lower, upper, seed)
 
-    for i in range(NSAMPLES):
+    for __ in range(NSAMPLES):
         x = dist.rvs(MU, cov)
         isinbounds = ((lower[0] < x[0] < upper[0])
                       & (lower[1] < x[1] < upper[1]))

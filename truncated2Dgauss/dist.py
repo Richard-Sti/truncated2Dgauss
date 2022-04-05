@@ -204,7 +204,7 @@ class Truncated2DGauss:
         """
         Rejection sampling of a single observation from the truncated 2D
         distribution.
-        
+
         Arguments
         ---------
         mean : 1-dimensional array

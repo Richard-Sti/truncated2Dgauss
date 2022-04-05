@@ -45,13 +45,7 @@ def list_to_array(x, enforce_float=False):
 class Truncated2DGauss:
     """
     A truncated 2-dimensional Gaussian distribution with probability density
-    function and random sampling methods.
-
-    Calculated following:
-    
-        Genz, Alan. “Numerical Computation of Multivariate Normal
-        Probabilities.” Journal of Computational and Graphical Statistics 1,
-        no. 2 (1992): 141–49. https://doi.org/10.2307/1390838.
+    function and random sampling methods. Calculated following [1].
 
     Arguments
     ---------
@@ -64,6 +58,12 @@ class Truncated2DGauss:
     atol : float, optional
         Absolute tolerance for ensuring the covariance matrix is symmetric.
         By default 1e-8.
+
+    References
+    ----------
+    .. [1] Genz, Alan. “Numerical Computation of Multivariate Normal
+        Probabilities.” Journal of Computational and Graphical Statistics 1,
+        no. 2 (1992): 141–49. https://doi.org/10.2307/1390838.
     """
     _lower = None
     _upper = None

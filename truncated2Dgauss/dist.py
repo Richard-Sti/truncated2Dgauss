@@ -87,7 +87,7 @@ class Truncated2DGauss:
         if random_generator is None:
             self._random_generator = numpy.random.default_rng()
         elif isinstance(random_generator, int):
-            self._random_generator = numpy.random.default_rng(random_generator) 
+            self._random_generator = numpy.random.default_rng(random_generator)
         else:
             self._random_generator = random_generator
         self._atol = atol

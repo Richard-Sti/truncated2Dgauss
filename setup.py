@@ -30,7 +30,7 @@ setup(
     packages=['truncated2Dgauss'],
     install_requires=['scipy>=0.16.0',
                       'numpy>=1.17.0',
-                      'Cython'],
+                      'Cython>=0.29'],
     python_requires=">=3.6",
     classifiers=[
         'Development Status :: 1 - Planning',

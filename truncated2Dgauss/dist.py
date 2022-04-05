@@ -72,8 +72,8 @@ class Truncated2DGauss:
 
     def __init__(self, lower, upper, random_generator=None, atol=1e-8):
         # Ensure we have numpy arrays
-        self._lower = list_to_array(lower)
-        self._upper = list_to_array(upper)
+        self._lower = list_to_array(lower).astype(float)
+        self._upper = list_to_array(upper).astype(float)
         if self._lower.size != 2 or self._upper.size != 2:
             raise ValueError("Box upper and lower must each have size 2.")
         # Which have correct ordering

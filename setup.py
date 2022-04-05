@@ -14,8 +14,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-
-from matplotlib.pyplot import annotate
 from setuptools import setup
 from Cython.Build import cythonize
 from numpy import get_include
@@ -30,9 +28,10 @@ setup(
     author_email='richard.stiskalek@protonmail.com',
     license='GPL-3.0',
     packages=['truncated2Dgauss'],
-    install_requires=['scipy',
-                      'numpy',
-                      'Cython'],
+    install_requires=['scipy>=0.16.0',
+                      'numpy>=1.17.0',
+                      'Cython>=0.29'],
+    python_requires=">=3.6",
     classifiers=[
         'Development Status :: 1 - Planning',
         'Intended Audience :: Science/Research',

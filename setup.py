@@ -31,6 +31,7 @@ setup(
     install_requires=['scipy>=0.16.0',
                       'numpy>=1.17.0',
                       'Cython'],
+    python_requires=">=3.6",
     classifiers=[
         'Development Status :: 1 - Planning',
         'Intended Audience :: Science/Research',

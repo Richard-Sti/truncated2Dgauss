@@ -6,3 +6,4 @@ build/*
 */__pycache__/*
 *.vscode
 truncated2Dgauss.egg-info/
+dist/
